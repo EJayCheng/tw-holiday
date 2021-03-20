@@ -1,14 +1,14 @@
 {
   "name": "tw-holiday",
   "version": "1.0.0",
-  "description": "",
+  "description": "將 政府行政機關辦公日曆表 提供出 javascript 串接介面",
   "main": "./dist/index.js",
+  "repository": "https://github.com/EJayCheng/tw-holiday",
   "scripts": {
-    "prepublish": "rm -rf dist && tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublish": "rm -rf dist && tsc"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "EJay Cheng",
+  "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
     "dayjs": "^1.10.4"

@@ -8,10 +8,20 @@ const DataUrl =
   "https://data.ntpc.gov.tw/api/datasets/308DCD75-6434-45BC-A95F-584DA4FED251/json";
 
 export class Holiday {
+  /**
+   * 是否開啟快取功能
+   * 預設:關閉
+   */
   public static enabledCache: boolean = false;
-  private static cacheTimer: any;
-  /** 快取時間 */
+
+  /** 快取時間
+   * 預設: 24 小時
+   * 單位: 毫秒
+   */
   public static cacheTime: number = 24 * 60 * 60 * 1000;
+
+  private static cacheTimer: any;
+
   private static cache: Promise<HolidayEvent[]>;
 
   public static async fetchEvents(
@@ -68,15 +78,3 @@ export class Holiday {
       });
   }
 }
-
-async function main() {
-  console.time("fetchEvents 1");
-  await Holiday.fetchEvents();
-  console.timeEnd("fetchEvents 1");
-  console.time("fetchEvents 2");
-  await Holiday.fetchEvents();
-  console.timeEnd("fetchEvents 2");
-  return;
-}
-
-main();

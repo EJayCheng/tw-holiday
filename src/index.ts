@@ -1,7 +1,8 @@
 import axios from "axios";
-import * as dayjs from "dayjs";
-import * as isoWeek from "dayjs/plugin/isoWeek";
-import { HolidayEvent, HolidayRaw } from "event.dto";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
+import { HolidayEvent, HolidayRaw } from "./event.dto";
+export * from "./event.dto";
 dayjs.extend(isoWeek);
 
 const DataUrl =
@@ -22,7 +23,7 @@ export class Holiday {
 
   private static cacheTimer: any;
 
-  private static cache: Promise<HolidayEvent[]>;
+  private static cache: Promise<HolidayEvent[]> = null;
 
   public static async fetchEvents(
     /** 強制重新載入 */

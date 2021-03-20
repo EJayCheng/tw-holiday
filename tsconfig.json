@@ -7,9 +7,13 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "es6",
+    "esModuleInterop":true,
     "sourceMap": true,
+    "allowJs": true,
     "outDir": "./dist",
     "baseUrl": "./src",
     "incremental": true
-  }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

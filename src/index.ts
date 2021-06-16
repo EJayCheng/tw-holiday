@@ -69,7 +69,7 @@ export class Holiday {
         });
       })
       .catch((error) => {
-        console.error("Error Holiday.loadEvent:", {
+        console.error("Error Holiday.loadEventByPage:", {
           DataUrl,
           page,
           size,
@@ -77,5 +77,10 @@ export class Holiday {
         });
         throw error;
       });
+  }
+
+  public static async isHoliday(date: string): Promise<boolean> {
+    let events = await Holiday.fetchEvents();
+    return !!events.find((event) => event.date === date && event.isHoliday);
   }
 }

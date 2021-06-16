@@ -6,7 +6,11 @@
 
 政府資料開放平臺 - 政府行政機關辦公日曆表: https://data.gov.tw/dataset/26557
 
+新北市政府資料開放平臺 - 政府行政機關辦公日曆表: https://data.ntpc.gov.tw/datasets/308DCD75-6434-45BC-A95F-584DA4FED251
+
 ## Installation
+
+[GitHub](https://github.com/EJayCheng/tw-holiday) / [npm](https://www.npmjs.com/package/tw-holiday)
 
 ```
 npm install tw-holiday --save
@@ -53,4 +57,9 @@ Holiday.cacheTime = 60 * 1000;
 
 // Holiday.fetchEvents(): Promise<HolidayEvent[]>
 Holiday.fetchEvents().then(console.log).catch(console.error);
+```
+
+```typescript
+// Holiday.isHoliday(date: string): Promise<boolean>
+Holiday.isHoliday("2021-12-31");
 ```

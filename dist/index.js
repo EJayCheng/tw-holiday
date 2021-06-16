@@ -73,13 +73,19 @@ class Holiday {
             });
         })
             .catch((error) => {
-            console.error("Error Holiday.loadEvent:", {
+            console.error("Error Holiday.loadEventByPage:", {
                 DataUrl,
                 page,
                 size,
                 error,
             });
             throw error;
+        });
+    }
+    static isHoliday(date) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let events = yield Holiday.fetchEvents();
+            return !!events.find((event) => event.date === date && event.isHoliday);
         });
     }
 }

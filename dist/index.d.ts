@@ -8,4 +8,5 @@ export declare class Holiday {
     static fetchEvents(forceReload?: boolean): Promise<HolidayEvent[]>;
     private static loadAllEvents;
     private static loadEventByPage;
+    static isHoliday(date: string): Promise<boolean>;
 }

@@ -1,6 +1,6 @@
 import { HolidayEvent } from "./event.dto";
 export * from "./event.dto";
-export declare class Holiday {
+export declare class TaiwanHoliday {
     static enabledCache: boolean;
     static cacheTime: number;
     private static cacheTimer;

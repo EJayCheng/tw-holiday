@@ -1,6 +1,7 @@
 export interface HolidayRaw {
   date: string;
   name: string;
+  chinese: string;
   isHoliday: "是" | "否" | boolean;
   holidayCategory: string;
   description: string;
@@ -19,6 +20,7 @@ export interface HolidayEvent {
   /** 說明 */
   description: string;
   /**
+   * gets the current ISO day of the week
    * - 1: 星期一
    * - 2: 星期二
    * - 3: 星期三

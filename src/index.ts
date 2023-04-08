@@ -8,7 +8,7 @@ dayjs.extend(isoWeek);
 const DataUrl =
   "https://data.ntpc.gov.tw/api/datasets/308DCD75-6434-45BC-A95F-584DA4FED251/json";
 
-export class Holiday {
+export class TaiwanHoliday {
   /**
    * 是否開啟快取功能
    * 預設:關閉
@@ -29,23 +29,26 @@ export class Holiday {
     /** 強制重新載入 */
     forceReload: boolean = false
   ): Promise<HolidayEvent[]> {
-    if (!Holiday.enabledCache) return this.loadAllEvents();
-    if (Holiday.cache && !forceReload) return Holiday.cache;
-    Holiday.cache = this.loadAllEvents();
-    if (Holiday.cacheTimer) {
-      clearTimeout(Holiday.cacheTimer);
+    if (!TaiwanHoliday.enabledCache) return this.loadAllEvents();
+    if (TaiwanHoliday.cache && !forceReload) return TaiwanHoliday.cache;
+    TaiwanHoliday.cache = this.loadAllEvents().catch((error) => {
+      TaiwanHoliday.cache = null;
+      return null;
+    });
+    if (TaiwanHoliday.cacheTimer) {
+      clearTimeout(TaiwanHoliday.cacheTimer);
     }
-    Holiday.cacheTimer = setTimeout(() => {
-      Holiday.cache = null;
-      Holiday.cacheTimer = null;
-    }, Holiday.cacheTime);
-    return Holiday.cache;
+    TaiwanHoliday.cacheTimer = setTimeout(() => {
+      TaiwanHoliday.cache = null;
+      TaiwanHoliday.cacheTimer = null;
+    }, TaiwanHoliday.cacheTime);
+    return TaiwanHoliday.cache;
   }
 
   private static async loadAllEvents(): Promise<HolidayEvent[]> {
     let events: HolidayEvent[] = [];
     for (let page = 0; page <= 10; page++) {
-      let data = await Holiday.loadEventByPage(page);
+      let data = await TaiwanHoliday.loadEventByPage(page);
       if (!data.length) break;
       events = events.concat(data);
     }
@@ -64,7 +67,9 @@ export class Holiday {
           let date = dayjs(r.date);
           r.date = date.format("YYYY-MM-DD");
           r.week = date.isoWeekday();
+          r.name = r.chinese || "";
           r.isHoliday = r.isHoliday === "是";
+          delete r.chinese;
           return r as HolidayEvent;
         });
       })
@@ -80,7 +85,14 @@ export class Holiday {
   }
 
   public static async isHoliday(date: string): Promise<boolean> {
-    let events = await Holiday.fetchEvents();
-    return !!events.find((event) => event.date === date && event.isHoliday);
+    let d = dayjs(date);
+    if (!d.isValid()) {
+      throw new Error("Error TaiwanHoliday.isHoliday: Invalid date input.");
+    }
+    let events = await TaiwanHoliday.fetchEvents();
+    date = d.format("YYYY-MM-DD");
+    return !!events.find((e) => e.date === date && e.isHoliday);
   }
 }
+
+// TaiwanHoliday.fetchEvents().then(console.log);

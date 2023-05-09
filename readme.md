@@ -45,21 +45,21 @@ interface HolidayEvent {
 
 ```typescript
 // javascript
-const { Holiday } = require("tw-holiday");
+const { TaiwanHoliday } = require("tw-holiday");
 // typescript
-import { Holiday } from "tw-holiday";
+import { TaiwanHoliday } from "tw-holiday";
 
 // 啟用快取, 選用, 預設: false
-Holiday.enabledCache = true;
+TaiwanHoliday.enabledCache = true;
 
 // 設定快取時間, 選用, 預設: 24 * 60 * 60 * 1000, 單位: 毫秒
-Holiday.cacheTime = 60 * 1000;
+TaiwanHoliday.cacheTime = 60 * 1000;
 
 // Holiday.fetchEvents(): Promise<HolidayEvent[]>
-Holiday.fetchEvents().then(console.log).catch(console.error);
+TaiwanHoliday.fetchEvents().then(console.log).catch(console.error);
 ```
 
 ```typescript
-// Holiday.isHoliday(date: string): Promise<boolean>
-Holiday.isHoliday("2021-12-31");
+// TaiwanHoliday.isHoliday(date: string): Promise<boolean>
+TaiwanHoliday.isHoliday("2021-12-31");
 ```

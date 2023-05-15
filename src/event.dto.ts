@@ -2,7 +2,7 @@ export interface HolidayRaw {
   date: string;
   name: string;
   chinese: string;
-  isHoliday: "是" | "否" | boolean;
+  isholiday: "是" | "否" | boolean;
   holidayCategory: string;
   description: string;
   week?: number;

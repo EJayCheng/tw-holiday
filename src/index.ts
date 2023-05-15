@@ -1,7 +1,7 @@
 import axios from "axios";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
-import { HolidayEvent, HolidayRaw } from "./event.dto";
+import {HolidayEvent, HolidayRaw} from "./event.dto";
 export * from "./event.dto";
 dayjs.extend(isoWeek);
 
@@ -29,8 +29,12 @@ export class TaiwanHoliday {
     /** 強制重新載入 */
     forceReload: boolean = false
   ): Promise<HolidayEvent[]> {
-    if (!TaiwanHoliday.enabledCache) return this.loadAllEvents();
-    if (TaiwanHoliday.cache && !forceReload) return TaiwanHoliday.cache;
+    if (!TaiwanHoliday.enabledCache) {
+      return this.loadAllEvents();
+    }
+    if (TaiwanHoliday.cache && !forceReload) {
+      return TaiwanHoliday.cache;
+    }
     TaiwanHoliday.cache = this.loadAllEvents().catch((error) => {
       TaiwanHoliday.cache = null;
       return null;
@@ -60,16 +64,17 @@ export class TaiwanHoliday {
     size: number = 1000
   ): Promise<HolidayEvent[]> {
     return axios
-      .get(DataUrl, { params: { page, size } })
+      .get(DataUrl, {params: {page, size}})
       .then((r) => r.data)
       .then((rows: HolidayRaw[]) => {
-        return rows.map((r) => {
+        return rows.map((r: any) => {
           let date = dayjs(r.date);
           r.date = date.format("YYYY-MM-DD");
           r.week = date.isoWeekday();
-          r.name = r.chinese || "";
-          r.isHoliday = r.isHoliday === "是";
+          r.name = (r.chinese || "").trim();
+          r.isHoliday = r.isholiday === "是";
           delete r.chinese;
+          delete r.isholiday;
           return r as HolidayEvent;
         });
       })
@@ -84,7 +89,9 @@ export class TaiwanHoliday {
       });
   }
 
-  public static async isHoliday(date: string): Promise<boolean> {
+  public static async isHoliday(
+    date: string = dayjs().format("YYYY-MM-DD")
+  ): Promise<boolean> {
     let d = dayjs(date);
     if (!d.isValid()) {
       throw new Error("Error TaiwanHoliday.isHoliday: Invalid date input.");
@@ -94,5 +101,3 @@ export class TaiwanHoliday {
     return !!events.find((e) => e.date === date && e.isHoliday);
   }
 }
-
-// TaiwanHoliday.fetchEvents().then(console.log);

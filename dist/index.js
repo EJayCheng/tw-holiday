@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -32,10 +36,12 @@ const DataUrl = "https://data.ntpc.gov.tw/api/datasets/308DCD75-6434-45BC-A95F-5
 class TaiwanHoliday {
     static fetchEvents(forceReload = false) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!TaiwanHoliday.enabledCache)
+            if (!TaiwanHoliday.enabledCache) {
                 return this.loadAllEvents();
-            if (TaiwanHoliday.cache && !forceReload)
+            }
+            if (TaiwanHoliday.cache && !forceReload) {
                 return TaiwanHoliday.cache;
+            }
             TaiwanHoliday.cache = this.loadAllEvents().catch((error) => {
                 TaiwanHoliday.cache = null;
                 return null;
@@ -68,12 +74,13 @@ class TaiwanHoliday {
             .then((r) => r.data)
             .then((rows) => {
             return rows.map((r) => {
-                let date = dayjs_1.default(r.date);
+                let date = (0, dayjs_1.default)(r.date);
                 r.date = date.format("YYYY-MM-DD");
                 r.week = date.isoWeekday();
-                r.name = r.chinese || "";
-                r.isHoliday = r.isHoliday === "是";
+                r.name = (r.chinese || "").trim();
+                r.isHoliday = r.isholiday === "是";
                 delete r.chinese;
+                delete r.isholiday;
                 return r;
             });
         })
@@ -87,9 +94,9 @@ class TaiwanHoliday {
             throw error;
         });
     }
-    static isHoliday(date) {
+    static isHoliday(date = (0, dayjs_1.default)().format("YYYY-MM-DD")) {
         return __awaiter(this, void 0, void 0, function* () {
-            let d = dayjs_1.default(date);
+            let d = (0, dayjs_1.default)(date);
             if (!d.isValid()) {
                 throw new Error("Error TaiwanHoliday.isHoliday: Invalid date input.");
             }

@@ -32,26 +32,25 @@ const dayjs_1 = __importDefault(require("dayjs"));
 const isoWeek_1 = __importDefault(require("dayjs/plugin/isoWeek"));
 __exportStar(require("./event.dto"), exports);
 dayjs_1.default.extend(isoWeek_1.default);
-const DataUrl = "https://data.ntpc.gov.tw/api/datasets/308DCD75-6434-45BC-A95F-584DA4FED251/json";
+const DataUrl = 'https://data.ntpc.gov.tw/api/datasets/308DCD75-6434-45BC-A95F-584DA4FED251/json';
 class TaiwanHoliday {
-    static fetchEvents(forceReload = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!TaiwanHoliday.enabledCache) {
-                return this.loadAllEvents();
+    static fetchEvents() {
+        return __awaiter(this, arguments, void 0, function* (forceReload = false) {
+            if (forceReload) {
+                TaiwanHoliday.clearCache();
             }
-            if (TaiwanHoliday.cache && !forceReload) {
+            if (!TaiwanHoliday.enabledCache) {
+                return TaiwanHoliday.loadAllEvents();
+            }
+            if (TaiwanHoliday.cache) {
                 return TaiwanHoliday.cache;
             }
             TaiwanHoliday.cache = this.loadAllEvents().catch((error) => {
-                TaiwanHoliday.cache = null;
-                return null;
+                TaiwanHoliday.clearCache();
+                throw error;
             });
-            if (TaiwanHoliday.cacheTimer) {
-                clearTimeout(TaiwanHoliday.cacheTimer);
-            }
             TaiwanHoliday.cacheTimer = setTimeout(() => {
-                TaiwanHoliday.cache = null;
-                TaiwanHoliday.cacheTimer = null;
+                TaiwanHoliday.clearCache();
             }, TaiwanHoliday.cacheTime);
             return TaiwanHoliday.cache;
         });
@@ -59,8 +58,8 @@ class TaiwanHoliday {
     static loadAllEvents() {
         return __awaiter(this, void 0, void 0, function* () {
             let events = [];
-            for (let page = 0; page <= 10; page++) {
-                let data = yield TaiwanHoliday.loadEventByPage(page);
+            for (let page = 0; page <= Infinity; page++) {
+                let data = yield TaiwanHoliday.loadEventByPage(page).catch(() => []);
                 if (!data.length)
                     break;
                 events = events.concat(data);
@@ -68,42 +67,56 @@ class TaiwanHoliday {
             return events;
         });
     }
-    static loadEventByPage(page = 0, size = 1000) {
-        return axios_1.default
-            .get(DataUrl, { params: { page, size } })
-            .then((r) => r.data)
-            .then((rows) => {
-            return rows.map((r) => {
-                let date = (0, dayjs_1.default)(r.date);
-                r.date = date.format("YYYY-MM-DD");
-                r.week = date.isoWeekday();
-                r.name = (r.chinese || "").trim();
-                r.isHoliday = r.isholiday === "是";
-                delete r.chinese;
-                delete r.isholiday;
-                return r;
+    static rawToHolidayEvent(raw) {
+        let date = (0, dayjs_1.default)(raw.date);
+        const event = {
+            date: date.format('YYYY-MM-DD'),
+            week: date.isoWeekday(),
+            year: raw.year || date.format('YYYY'),
+            name: (raw.name || raw.holidaycategory || '').trim(),
+            description: (raw.description || '').trim(),
+            isHoliday: raw.isholiday === '是',
+            holidayCategory: (raw.holidaycategory || '').trim(),
+        };
+        if (event.name === '星期六、星期日' && event.isHoliday) {
+            event.name = event.week == 6 ? '星期六' : '星期日';
+        }
+        return event;
+    }
+    static loadEventByPage() {
+        return __awaiter(this, arguments, void 0, function* (page = 0, size = 1000) {
+            return axios_1.default
+                .get(DataUrl, { params: { page, size } })
+                .then((r) => r.data)
+                .then((rows) => rows.map((r) => TaiwanHoliday.rawToHolidayEvent(r)))
+                .catch((error) => {
+                console.error('Error Holiday.loadEventByPage:', {
+                    DataUrl,
+                    page,
+                    size,
+                    error,
+                });
+                throw error;
             });
-        })
-            .catch((error) => {
-            console.error("Error Holiday.loadEventByPage:", {
-                DataUrl,
-                page,
-                size,
-                error,
-            });
-            throw error;
         });
     }
-    static isHoliday(date = (0, dayjs_1.default)().format("YYYY-MM-DD")) {
-        return __awaiter(this, void 0, void 0, function* () {
+    static isHoliday() {
+        return __awaiter(this, arguments, void 0, function* (date = (0, dayjs_1.default)().format('YYYY-MM-DD')) {
             let d = (0, dayjs_1.default)(date);
             if (!d.isValid()) {
-                throw new Error("Error TaiwanHoliday.isHoliday: Invalid date input.");
+                throw new Error('Error TaiwanHoliday.isHoliday: Invalid date input.');
             }
             let events = yield TaiwanHoliday.fetchEvents();
-            date = d.format("YYYY-MM-DD");
+            date = d.format('YYYY-MM-DD');
             return !!events.find((e) => e.date === date && e.isHoliday);
         });
+    }
+    static clearCache() {
+        TaiwanHoliday.cache = null;
+        if (TaiwanHoliday.cacheTimer) {
+            clearTimeout(TaiwanHoliday.cacheTimer);
+            TaiwanHoliday.cacheTimer = null;
+        }
     }
 }
 exports.TaiwanHoliday = TaiwanHoliday;

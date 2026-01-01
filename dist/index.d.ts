@@ -1,5 +1,5 @@
-import { HolidayEvent } from "./event.dto";
-export * from "./event.dto";
+import { HolidayEvent } from './event.dto';
+export * from './event.dto';
 export declare class TaiwanHoliday {
     static enabledCache: boolean;
     static cacheTime: number;
@@ -7,6 +7,8 @@ export declare class TaiwanHoliday {
     private static cache;
     static fetchEvents(forceReload?: boolean): Promise<HolidayEvent[]>;
     private static loadAllEvents;
+    private static rawToHolidayEvent;
     private static loadEventByPage;
     static isHoliday(date?: string): Promise<boolean>;
+    static clearCache(): void;
 }

@@ -13,14 +13,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const dayjs_1 = __importDefault(require("dayjs"));
+const fs_1 = require("fs");
 const _1 = require("./");
 _1.TaiwanHoliday.enabledCache = true;
+_1.TaiwanHoliday.fetchEvents().then((events) => {
+    (0, fs_1.writeFileSync)('./events.json', JSON.stringify(events, null, 2));
+});
 let d = (0, dayjs_1.default)();
 (() => __awaiter(void 0, void 0, void 0, function* () {
     for (let i = 0; i < 100; i++) {
-        let date = d.format("YYYY-MM-DD");
+        let date = d.format('YYYY-MM-DD');
         console.log(date, yield _1.TaiwanHoliday.isHoliday(date));
-        d = d.add(1, "day");
+        d = d.add(1, 'day');
     }
+    _1.TaiwanHoliday.clearCache();
 }))();
 //# sourceMappingURL=test.js.map

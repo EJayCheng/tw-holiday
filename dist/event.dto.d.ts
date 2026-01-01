@@ -1,11 +1,10 @@
 export interface HolidayRaw {
     date: string;
     name: string;
-    chinese: string;
-    isholiday: "是" | "否" | boolean;
-    holidayCategory: string;
+    year: string;
+    isholiday: '是' | '否';
+    holidaycategory: string;
     description: string;
-    week?: number;
 }
 export interface HolidayEvent {
     date: string;
@@ -14,4 +13,5 @@ export interface HolidayEvent {
     holidayCategory: string;
     description: string;
     week: number;
+    year: string;
 }

@@ -1,6 +1,6 @@
 {
   "name": "tw-holiday",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "將 政府行政機關辦公日曆表 提供出 javascript 串接介面",
   "main": "./dist/index.js",
   "repository": "https://github.com/EJayCheng/tw-holiday",

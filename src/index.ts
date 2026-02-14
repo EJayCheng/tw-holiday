@@ -5,51 +5,79 @@ import { HolidayEvent, HolidayRaw } from './event.dto';
 export * from './event.dto';
 dayjs.extend(isoWeek);
 
+/**
+ * API endpoint URL for Taiwan holiday data from New Taipei City Government Open Data
+ * 新北市政府開放資料的台灣假日資料 API 端點網址
+ */
 const DataUrl =
   'https://data.ntpc.gov.tw/api/datasets/308DCD75-6434-45BC-A95F-584DA4FED251/json';
 
+/**
+ * Taiwan Holiday utility class for fetching and checking Taiwan public holidays
+ * 台灣假日工具類別，用於取得和檢查台灣公共假日
+ */
 export class TaiwanHoliday {
   /**
-   * 是否開啟快取功能
-   * 預設:關閉
+   * Whether to enable cache functionality
+   * 是否啟用快取功能
+   * @default false 預設：關閉
    */
   public static enabledCache: boolean = false;
 
-  /** 快取時間
-   * 預設: 24 小時
-   * 單位: 毫秒
+  /**
+   * Cache expiration time
+   * 快取過期時間
+   * @default 24 hours (in milliseconds) | 24 小時（毫秒）
    */
   public static cacheTime: number = 24 * 60 * 60 * 1000;
 
+  /**
+   * Cache timer reference for automatic cleanup
+   * 快取計時器參考，用於自動清理
+   */
   private static cacheTimer: any;
 
+  /**
+   * Cached promise of holiday events
+   * 已快取的假日事件 Promise
+   */
   private static cache: Promise<HolidayEvent[]> = null;
 
+  /**
+   * Fetches all holiday events from the API or cache
+   * 從 API 或快取中取得所有假日事件
+   * @param forceReload - Force reload from API, bypassing cache | 強制從 API 重新載入，略過快取
+   * @returns Promise resolving to array of holiday events | 回傳假日事件陣列的 Promise
+   */
   public static async fetchEvents(
-    /** 強制重新載入 */
     forceReload: boolean = false,
   ): Promise<HolidayEvent[]> {
-    // 如果強制重新載入，清除快取和計時器
+    // If force reload is requested, clear cache and timer
+    // 如果要求強制重新載入，清除快取和計時器
     if (forceReload) {
       TaiwanHoliday.clearCache();
     }
 
+    // If cache is not enabled, load directly without using or setting cache
     // 如果未啟用快取，直接載入（不使用也不設定快取）
     if (!TaiwanHoliday.enabledCache) {
       return TaiwanHoliday.loadAllEvents();
     }
 
+    // If cache exists, return it directly
     // 如果有快取，直接返回
     if (TaiwanHoliday.cache) {
       return TaiwanHoliday.cache;
     }
 
+    // Create new cache
     // 建立新的快取
     TaiwanHoliday.cache = this.loadAllEvents().catch((error) => {
       TaiwanHoliday.clearCache();
       throw error;
     });
 
+    // Set cache expiration timer
     // 設定快取過期計時器
     TaiwanHoliday.cacheTimer = setTimeout(() => {
       TaiwanHoliday.clearCache();
@@ -58,6 +86,12 @@ export class TaiwanHoliday {
     return TaiwanHoliday.cache;
   }
 
+  /**
+   * Loads all holiday events by paginating through all available pages
+   * 透過分頁載入所有可用頁面的假日事件
+   * @returns Promise resolving to array of all holiday events | 回傳所有假日事件陣列的 Promise
+   * @private
+   */
   private static async loadAllEvents(): Promise<HolidayEvent[]> {
     // console.log('Loading all holiday events from data source...');
     let events: HolidayEvent[] = [];
@@ -69,6 +103,13 @@ export class TaiwanHoliday {
     return events;
   }
 
+  /**
+   * Converts raw API data to processed holiday event object
+   * 將原始 API 資料轉換為處理後的假日事件物件
+   * @param raw - Raw holiday data from API | 從 API 取得的原始假日資料
+   * @returns Processed holiday event object | 處理後的假日事件物件
+   * @private
+   */
   private static rawToHolidayEvent(raw: HolidayRaw): HolidayEvent {
     let date = dayjs(raw.date);
     const event: HolidayEvent = {
@@ -80,12 +121,22 @@ export class TaiwanHoliday {
       isHoliday: raw.isholiday === '是',
       holidayCategory: (raw.holidaycategory || '').trim(),
     };
+    // Handle weekend naming: split "Saturday, Sunday" into individual day names
+    // 處理週末命名：將「星期六、星期日」分割為個別日期名稱
     if (event.name === '星期六、星期日' && event.isHoliday) {
       event.name = event.week == 6 ? '星期六' : '星期日';
     }
     return event;
   }
 
+  /**
+   * Loads holiday events for a specific page from the API
+   * 從 API 載入特定頁面的假日事件
+   * @param page - Page number (0-indexed) | 頁碼（從 0 開始）
+   * @param size - Number of items per page | 每頁項目數量
+   * @returns Promise resolving to array of holiday events for the requested page | 回傳請求頁面的假日事件陣列 Promise
+   * @private
+   */
   private static async loadEventByPage(
     page: number = 0,
     size: number = 1000,
@@ -107,6 +158,13 @@ export class TaiwanHoliday {
       });
   }
 
+  /**
+   * Checks if a given date is a public holiday in Taiwan
+   * 檢查給定日期是否為台灣的公共假日
+   * @param date - Date string in YYYY-MM-DD format (defaults to today) | YYYY-MM-DD 格式的日期字串（預設為今天）
+   * @returns Promise resolving to true if the date is a holiday, false otherwise | 如果是假日回傳 true，否則回傳 false 的 Promise
+   * @throws Error if the date string is invalid | 如果日期字串無效則拋出錯誤
+   */
   public static async isHoliday(
     date: string = dayjs().format('YYYY-MM-DD'),
   ): Promise<boolean> {
@@ -119,6 +177,10 @@ export class TaiwanHoliday {
     return !!events.find((e) => e.date === date && e.isHoliday);
   }
 
+  /**
+   * Clears the cache and cancels the cache expiration timer
+   * 清除快取並取消快取過期計時器
+   */
   public static clearCache() {
     TaiwanHoliday.cache = null;
     if (TaiwanHoliday.cacheTimer) {
